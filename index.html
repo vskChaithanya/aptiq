@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AptIQ — Topic-based Quizzes</title>
+
+  <!-- Font (optional) -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <svg width="44" height="44" viewBox="0 0 24 24" aria-hidden focusable="false">
+          <defs><linearGradient id="gA" x1="0" x2="1"><stop offset="0" stop-color="#6366F1"/><stop offset="1" stop-color="#06B6D4"/></linearGradient></defs>
+          <rect rx="6" width="24" height="24" fill="url(#gA)"></rect>
+          <path d="M7 12h10M7 16h6" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+        <div>
+          <div class="title">AptIQ</div>
+          <div class="subtitle">Sharpen your aptitude • Boost your IQ</div>
+        </div>
+      </div>
+
+      <div class="controls-card">
+        <label for="topic">Topic</label>
+        <select id="topic" aria-label="Topic">
+          <option value="division">Division & Divisibility Rules</option>
+          <option value="lcm">LCM and HCF</option>
+          <option value="factors">Factors & Trailing Zeros</option>
+          <option value="lastdigit">Finding Last Digit</option>
+        </select>
+
+        <label for="level">Level</label>
+        <select id="level" aria-label="Level">
+          <option value="level1">Level 1 (15 qs)</option>
+          <option value="level2">Level 2 (15 qs)</option>
+        </select>
+
+        <button class="btn primary" id="startBtn" type="button">Start Quiz</button>
+        <div id="errArea" class="error" aria-live="polite"></div>
+
+        <div class="tips">
+          Tip: press <kbd>1</kbd>–<kbd>4</kbd> to answer quickly.
+        </div>
+      </div>
+
+      <footer class="sidebar-foot">
+        <small>Made for practice • Offline mock</small>
+      </footer>
+    </aside>
+
+    <main class="content">
+      <section class="card" id="cardMain">
+        <div id="welcome" class="welcome">
+          <h1>Welcome to AptIQ</h1>
+          <p class="muted">Choose a topic and level to begin a 15-question quiz.</p>
+        </div>
+
+        <div id="quiz" class="quiz" style="display:none">
+          <header class="quiz-head">
+            <div>
+              <div class="qmeta">
+                <div id="qTitle" class="qtitle">Question 1 of 15</div>
+                <div id="qMeta" class="meta">Topic • Level</div>
+              </div>
+            </div>
+
+            <div class="progress-wrap">
+              <div class="progress-info">
+                <div id="scoreArea" class="score">Correct: 0</div>
+              </div>
+              <div class="progress-bar" aria-hidden>
+                <div id="progressBar" class="progress-inner" style="width:0%"></div>
+              </div>
+            </div>
+          </header>
+
+          <article class="question-area">
+            <div id="questionText" class="question">Question text will appear here</div>
+            <div id="optionsArea" class="options" role="list"></div>
+          </article>
+
+          <footer class="quiz-controls">
+            <div class="left controls-left">
+              <button id="restartBtn" class="btn ghost" type="button">Restart</button>
+            </div>
+            <div class="right controls-right">
+              <button id="nextBtn" class="btn" disabled type="button">Next</button>
+            </div>
+          </footer>
+        </div>
+
+        <div id="result" class="result" style="display:none">
+          <div class="result-card">
+            <h2 id="resultTitle">Quiz Completed 🎉</h2>
+            <p id="resultMeta" class="muted">You scored X out of Y</p>
+            <div class="result-actions">
+              <button id="retryBtn" class="btn primary" type="button">Take Another Quiz</button>
+              <button id="shareBtn" class="btn ghost" type="button">Copy Result</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- topic bank files -->
+  <script src="division_bank.js"></script>
+  <script src="lcm_bank.js"></script>
+  <script src="factors_bank.js"></script>
+  <script src="lastdigit_bank.js"></script>
+
+  <!-- main quiz logic -->
+  <script src="app_topics.js"></script>
+</body>
+</html>
