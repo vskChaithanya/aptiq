@@ -33,8 +33,9 @@ const transporter = nodemailer.createTransport({
     tls: {
         rejectUnauthorized: false
     },
-    debug: true,  // This will print the exact conversation with Google
-    logger: true  // This ensures the logs show up in Render
+    // THE MAGIC FIX FOR RENDER
+    // This forces the server to use normal IPv4 and stops the timeout crash!
+    family: 4 
 });
 
 const registrationVault = {};
