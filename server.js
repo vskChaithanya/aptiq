@@ -23,17 +23,18 @@ mongoose.connect(process.env.MONGO_URI)
   .catch(err => console.error('Could not connect to MongoDB:', err));
 
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
     host: 'smtp.gmail.com',
-    port: 587,         // Changed from 465
-    secure: false,     // MUST be false for port 587
+    port: 465,
+    secure: true,
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS
     },
     tls: {
         rejectUnauthorized: false
-    }
+    },
+    debug: true,  // This will print the exact conversation with Google
+    logger: true  // This ensures the logs show up in Render
 });
 
 const registrationVault = {};
