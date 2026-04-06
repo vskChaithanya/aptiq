@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Dashboard | AptIQ</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    * { box-sizing: border-box; font-family: sans-serif; }
+    
+    body { background-color: #f0f4f8; margin: 0; padding: 20px; display: flex; justify-content: center; zoom: 0.85; }
+    
+    .dashboard-container { width: 100%; max-width: 1200px; display: flex; flex-direction: column; gap: 20px; }
+    
+    .header { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; }
+    .header h2 { margin: 0; color: #0f172a; font-size: 28px; }
+    
+    .btn-logout { background: #ef4444; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 15px; transition: 0.2s; }
+    .btn-logout:hover { background: #dc2626; }
+    
+    .btn-profile { background: #e2e8f0; color: #0f172a; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 15px; transition: 0.2s; display: flex; align-items: center; gap: 8px; }
+    .btn-profile:hover { background: #cbd5e1; }
+
+    .stats-row { display: flex; gap: 20px; }
+    .stat-card { background: white; flex: 1; padding: 20px; border-radius: 12px; display: flex; align-items: center; gap: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+    .stat-icon { font-size: 30px; background: #f8fafc; width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; border-radius: 50%; }
+    .stat-info h4 { margin: 0; color: #64748b; font-size: 13px; text-transform: uppercase; }
+    .stat-info h3 { margin: 5px 0 0 0; color: #0f172a; font-size: 24px; }
+
+    .charts-grid { display: flex; gap: 20px; margin-top: 10px; }
+    .chart-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); flex: 1; min-width: 0; }
+    
+    /* NEW: Strict wrapper to prevent Chart.js from expanding infinitely */
+    .chart-wrapper { position: relative; height: 220px; width: 100%; }
+    
+    .section-title { font-size: 19px; color: #334155; margin: 10px 0 0 0; font-weight: bold; display: flex; align-items: center; gap: 8px; }
+
+    .topics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; }
+    .topic-card { background: white; padding: 25px 20px; border-radius: 12px; text-align: center; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.03); transition: 0.2s; border: 2px solid transparent; }
+    .topic-card:hover { border-color: #3b82f6; transform: translateY(-3px); }
+    .topic-icon { font-size: 32px; margin-bottom: 15px; color: #3b82f6; }
+    .topic-title { font-weight: bold; color: #0f172a; font-size: 16px; }
+    
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 100; }
+    .modal { background: white; padding: 30px; border-radius: 16px; width: 350px; text-align: center; }
+    .level-btn { display: block; width: 100%; padding: 15px; margin: 10px 0; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; border: 2px solid #e2e8f0; background: white; color: #334155; transition: 0.2s; }
+    .level-btn:hover { background: #f8fafc; border-color: #94a3b8; }
+  </style>
+</head>
+<body>
+
+  <div class="dashboard-container">
+    <div class="header">
+      <h2 id="welcomeText">Welcome back!</h2>
+      <div style="display: flex; gap: 15px;">
+        <button class="btn-profile" onclick="window.location.href='profile.html'">👤 Profile</button>
+        <button class="btn-logout" onclick="logout()">Log Out</button>
+      </div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-icon">🏆</div>
+        <div class="stat-info">
+          <h4>Highest Practice Score</h4>
+          <h3 id="highScoreText">0 / 15</h3>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">⏱️</div>
+        <div class="stat-info">
+          <h4>Recent Activity</h4>
+          <h3 id="recentTestText">None</h3>
+        </div>
+      </div>
+    </div>
+
+    <div class="charts-grid">
+      <div class="chart-card">
+        <h3 style="margin: 0 0 15px 0; font-size: 16px; color: #0f172a;">🌱 Topic Practice History (out of 15)</h3>
+        <div class="chart-wrapper">
+          <canvas id="practiceChart"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h3 style="margin: 0 0 15px 0; font-size: 16px; color: #0f172a;">💼 Placement Task History (out of 100)</h3>
+        <div class="chart-wrapper">
+          <canvas id="taskChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="section-title">📋 Faculty Assigned Tasks</h3>
+    <div id="tasksContainer">
+      <div style="padding: 20px; background: #fff; border-radius: 12px; text-align: center; border: 2px dashed #cbd5e1; color: #64748b; font-size: 16px;">
+        Checking for assigned tasks...
+      </div>
+    </div>
+
+    <h3 class="section-title">Topic-Wise Practice</h3>
+    <div class="topics-grid">
+      <div class="topic-card" onclick="openLevelModal('division')">
+        <div class="topic-icon">➗</div>
+        <div class="topic-title">Division & Divisibility</div>
+      </div>
+      <div class="topic-card" onclick="openLevelModal('lcm')">
+        <div class="topic-icon">🔢</div>
+        <div class="topic-title">LCM and HCF</div>
+      </div>
+      <div class="topic-card" onclick="openLevelModal('factors')">
+        <div class="topic-icon">✖️</div>
+        <div class="topic-title">Factors & Zeros</div>
+      </div>
+      <div class="topic-card" onclick="openLevelModal('lastdigit')">
+        <div class="topic-icon">#️⃣</div>
+        <div class="topic-title">Finding Last Digit</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="levelModal">
+    <div class="modal">
+      <h3 style="margin-top: 0;">Select Difficulty</h3>
+      <p style="color: #64748b; font-size: 14px; margin-bottom: 20px;">Choose a level to start the practice test.</p>
+      <button class="level-btn" onclick="startPractice('Easy')">🌱 Easy</button>
+      <button class="level-btn" onclick="startPractice('Medium')">🔥 Medium</button>
+      <button class="level-btn" onclick="startPractice('Hard')">💀 Hard</button>
+      <button class="level-btn" onclick="closeLevelModal()" style="background: #f1f5f9; border: none; margin-top: 15px;">Cancel</button>
+    </div>
+  </div>
+
+  <script>
+    const user = JSON.parse(localStorage.getItem('aptiq_user'));
+    if (!user) window.location.href = 'login.html';
+
+    document.getElementById('welcomeText').textContent = `Welcome back, ${user.name.split(' ')[0]}!`;
+    document.getElementById('highScoreText').textContent = `${user.highestScore || 0} / 15`;
+    document.getElementById('recentTestText').textContent = user.recentTest || "None";
+
+    let selectedTopic = "";
+
+    function openLevelModal(topic) {
+      selectedTopic = topic;
+      document.getElementById('levelModal').style.display = 'flex';
+    }
+
+    function closeLevelModal() { document.getElementById('levelModal').style.display = 'none'; }
+
+    function startPractice(level) {
+      localStorage.setItem('aptiq_current_topic', selectedTopic);
+      localStorage.setItem('aptiq_current_level', level);
+      localStorage.setItem('aptiq_task_mode', 'false'); 
+      window.location.href = 'test.html';
+    }
+
+    function startTask(taskId, taskTitle) {
+      localStorage.setItem('aptiq_task_mode', 'true');
+      localStorage.setItem('aptiq_task_id', taskId);
+      localStorage.setItem('aptiq_task_title', taskTitle);
+      window.location.href = 'test.html';
+    }
+
+    async function loadTasks() {
+      try {
+        const res = await fetch('http://localhost:3000/api/tasks');
+        if (!res.ok) throw new Error("Backend failed to load tasks.");
+        
+        const tasks = await res.json();
+        const container = document.getElementById('tasksContainer');
+        
+        container.style.display = 'grid';
+        container.style.gridTemplateColumns = 'repeat(auto-fill, minmax(280px, 1fr))';
+        container.style.gap = '20px';
+        container.innerHTML = '';
+
+        if(tasks.length === 0) {
+          container.style.display = 'block';
+          container.innerHTML = '<div style="padding: 20px; background: #fff; border-radius: 12px; text-align: center; border: 2px dashed #cbd5e1; color: #64748b; font-size: 16px;">No tasks assigned yet.</div>';
+          return;
+        }
+
+        const completedTasks = (user.testHistory || []).map(t => t.topic);
+
+        tasks.forEach(task => {
+          const isCompleted = completedTasks.includes(`TASK: ${task.title}`);
+          const codeCount = task.codingQuestions ? task.codingQuestions.length : 0;
+          
+          const actionButton = isCompleted 
+            ? `<button disabled style="background: #e2e8f0; color: #94a3b8; padding: 12px; width: 100%; border: none; border-radius: 8px; font-weight: bold; cursor: not-allowed; font-size: 15px;">Completed ✅</button>`
+            : `<button onclick="startTask('${task._id}', '${task.title}')" style="background: #8b5cf6; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; font-size: 15px;">Start Task</button>`;
+
+          container.innerHTML += `
+            <div style="display: flex; flex-direction: column; justify-content: space-between; padding: 25px; background: white; border-radius: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-top: 5px solid ${isCompleted ? '#cbd5e1' : '#8b5cf6'};">
+              <div style="margin-bottom: 20px;">
+                <h4 style="margin: 0 0 10px 0; font-size: 20px; color: ${isCompleted ? '#94a3b8' : '#0f172a'};">${task.title}</h4>
+                <div style="font-size: 14px; color: #475569; background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0; line-height: 1.6;">
+                  <b>📝 40 MCQs</b><br>
+                  <b>💻 ${codeCount} Python Tasks</b>
+                </div>
+              </div>
+              ${actionButton}
+            </div>
+          `;
+        });
+      } catch(err) { 
+        document.getElementById('tasksContainer').style.display = 'block';
+        document.getElementById('tasksContainer').innerHTML = `
+          <div style="padding: 20px; background: #fef2f2; border-radius: 12px; text-align: center; border: 2px dashed #ef4444; color: #dc2626; font-weight: bold;">
+            🚨 Server Offline: Please restart your terminal with 'node server.js'
+          </div>`;
+      }
+    }
+
+    function renderCharts() {
+      const history = user.testHistory || [];
+      
+      const practiceHistory = history.filter(t => !t.topic.startsWith('TASK:'));
+      const taskHistory = history.filter(t => t.topic.startsWith('TASK:'));
+
+      // 1. Render Practice Chart
+      const pLabels = practiceHistory.length ? practiceHistory.map((_, i) => `Prac ${i + 1}`) : ["Prac 1", "Prac 2"];
+      const pData = practiceHistory.length ? practiceHistory.map(t => t.score) : [0, 0];
+
+      new Chart(document.getElementById('practiceChart').getContext('2d'), {
+        type: 'line',
+        data: {
+          labels: pLabels,
+          datasets: [{ label: 'MCQ Score', data: pData, borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)', borderWidth: 2, fill: true, tension: 0.3 }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, max: 15 } } }
+      });
+
+      // 2. Render Task Chart
+      const tLabels = taskHistory.length ? taskHistory.map((_, i) => `Task ${i + 1}`) : ["Task 1", "Task 2"];
+      const tData = taskHistory.length ? taskHistory.map(t => (t.score || 0) + (t.codingScore || 0)) : [0, 0];
+
+      new Chart(document.getElementById('taskChart').getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels: tLabels,
+          datasets: [{ label: 'Total Marks (MCQ+Code)', data: tData, backgroundColor: '#8b5cf6', borderRadius: 6 }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, max: 100 } } }
+      });
+    }
+
+    function logout() {
+      localStorage.clear();
+      window.location.href = 'login.html';
+    }
+
+    loadTasks();
+    renderCharts();
+  </script>
+</body>
+</html>

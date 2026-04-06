@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AptIQ Portal | Register</title>
+  <style>
+    * { box-sizing: border-box; font-family: sans-serif; }
+    body { background-color: #f0f4f8; margin: 0; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
+    
+    .login-card { background: white; width: 100%; max-width: 450px; padding: 40px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border: 1px solid rgba(14,30,60,0.04); text-align: center; }
+    
+    .title { margin: 0 0 5px 0; color: #0f172a; font-size: 26px; }
+    .subtitle { margin: 0 0 30px 0; color: #64748b; font-size: 14px; }
+
+    .tabs { display: flex; background: #f1f5f9; border-radius: 8px; padding: 5px; margin-bottom: 25px; }
+    .tab { flex: 1; padding: 10px; border: none; background: transparent; cursor: pointer; border-radius: 6px; font-weight: bold; color: #64748b; font-size: 14px; transition: 0.2s; }
+    .tab.active { background: white; color: #0f172a; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+
+    .input-group { margin-bottom: 15px; text-align: left; position: relative; }
+    .input-field { width: 100%; padding: 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 15px; outline: none; transition: border-color 0.2s; }
+    .input-field:focus { border-color: #3b82f6; }
+    .password-field { padding-right: 65px; }
+
+    .toggle-password {
+      position: absolute; right: 15px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; color: #64748b; font-size: 12px; font-weight: bold; 
+      cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .toggle-password:hover { color: #0f172a; }
+
+    .btn { width: 100%; padding: 14px; border-radius: 8px; border: none; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.2s; margin-bottom: 15px; }
+    .btn-primary { background: #3b82f6; color: white; }
+    .btn-primary:hover { background: #2563eb; }
+
+    .links { display: flex; justify-content: center; font-size: 14px; color: #64748b; margin-top: 10px; }
+    .links a { color: #8b5cf6; text-decoration: none; font-weight: bold; cursor: pointer; margin-left: 5px; }
+
+    #msgBox { margin-bottom: 15px; font-size: 13px; font-weight: bold; text-align: center; }
+  </style>
+</head>
+<body>
+
+  <div class="login-card">
+    <h2 class="title">Create Account</h2>
+    <p class="subtitle" id="roleSubtitle">Register as a University Student</p>
+
+    <div id="step-details">
+      <div class="tabs">
+        <button class="tab active" id="tab-student" onclick="switchRole('student')">👨‍🎓 Student</button>
+        <button class="tab" id="tab-faculty" onclick="switchRole('faculty')">👨‍🏫 Faculty</button>
+      </div>
+
+      <form id="registerForm">
+        <div class="input-group">
+          <input type="text" id="regName" class="input-field" placeholder="Full Name" required>
+        </div>
+        <div class="input-group">
+          <input type="text" id="regId" class="input-field" placeholder="Hall Ticket Number" required>
+        </div>
+        <div class="input-group">
+          <input type="email" id="regEmail" class="input-field" placeholder="student@sru.edu.in" required>
+        </div>
+        <div class="input-group">
+          <input type="password" id="regPassword" class="input-field password-field" placeholder="Create Password" required minlength="5">
+          <button type="button" class="toggle-password" onclick="togglePasswordVisibility('regPassword', this)">SHOW</button>
+        </div>
+        
+        <button type="submit" class="btn btn-primary" id="btnSendOTP">Send Verification OTP</button>
+      </form>
+    </div>
+
+    <div id="step-otp" style="display: none;">
+      <h3 style="margin: 0 0 10px 0; color: #0f172a;">Verify Your Email</h3>
+      <p style="font-size: 13px; color: #64748b; margin-bottom: 20px;">We've sent a 6-digit code to your email.<br>Enter it below to complete registration.</p>
+      
+      <div class="input-group">
+        <input type="text" id="regOtpInput" class="input-field" placeholder="Enter 6-digit OTP" maxlength="6" style="text-align: center; letter-spacing: 5px; font-size: 20px; font-weight: bold;">
+      </div>
+      
+      <button type="button" class="btn btn-primary" onclick="verifyRegistrationOTP()">Verify & Create Account</button>
+      <button type="button" class="btn" style="background: #f1f5f9; color: #0f172a;" onclick="cancelRegistration()">Cancel</button>
+    </div>
+
+    <div id="msgBox"></div>
+
+    <div class="links" id="loginLinkDiv">
+      Already have an account? <a href="login.html">Sign In</a>
+    </div>
+  </div>
+
+  <script>
+    let currentRole = 'student';
+    let pendingEmail = "";
+
+    function togglePasswordVisibility(inputId, btnElement) {
+      const input = document.getElementById(inputId);
+      if (input.type === "password") {
+        input.type = "text";
+        btnElement.textContent = "HIDE";
+      } else {
+        input.type = "password";
+        btnElement.textContent = "SHOW";
+      }
+    }
+
+    function switchRole(role) {
+      currentRole = role;
+      document.getElementById('tab-student').classList.toggle('active', role === 'student');
+      document.getElementById('tab-faculty').classList.toggle('active', role === 'faculty');
+      
+      document.getElementById('roleSubtitle').textContent = role === 'student' ? 'Register as a University Student' : 'Register as Faculty';
+      document.getElementById('regId').placeholder = role === 'student' ? 'Hall Ticket Number' : 'Employee ID';
+      
+      // 🚨 UPDATED PLACEHOLDER LOGIC HERE 🚨
+      document.getElementById('regEmail').placeholder = role === 'student' ? 'student@sru.edu.in' : 'aptiq.noreply@gmail.com';
+    }
+
+    function showMessage(msg, isSuccess) {
+      const box = document.getElementById('msgBox');
+      box.textContent = msg;
+      box.style.color = isSuccess ? '#10b981' : '#ef4444';
+      setTimeout(() => box.textContent = '', 5000);
+    }
+
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const name = document.getElementById('regName').value;
+      const hallTicket = document.getElementById('regId').value;
+      const email = document.getElementById('regEmail').value;
+      const password = document.getElementById('regPassword').value;
+      
+      const btn = document.getElementById('btnSendOTP');
+      btn.textContent = "Sending OTP..."; btn.disabled = true;
+
+      try {
+        const res = await fetch('http://localhost:3000/api/register/send-otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, hallTicket, email, password, role: currentRole })
+        });
+        
+        const data = await res.json();
+        
+        if (res.ok) {
+          pendingEmail = email;
+          document.getElementById('step-details').style.display = 'none';
+          document.getElementById('loginLinkDiv').style.display = 'none';
+          document.getElementById('step-otp').style.display = 'block';
+          showMessage("OTP Sent! Please check your email.", true);
+        } else {
+          showMessage(data.message, false);
+        }
+      } catch (err) { showMessage("Server error. Make sure node server.js is running.", false); }
+      
+      btn.textContent = "Send Verification OTP"; btn.disabled = false;
+    });
+
+    async function verifyRegistrationOTP() {
+      const otp = document.getElementById('regOtpInput').value;
+      if(otp.length !== 6) return showMessage("Please enter the full 6-digit OTP.", false);
+
+      try {
+        const res = await fetch('http://localhost:3000/api/register/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: pendingEmail, otp: otp })
+        });
+        
+        const data = await res.json();
+
+        if (res.ok) {
+          showMessage("Account created successfully! Redirecting to login...", true);
+          setTimeout(() => { window.location.href = 'login.html'; }, 2000);
+        } else {
+          showMessage(data.message, false);
+        }
+      } catch (err) { showMessage("Server error during verification.", false); }
+    }
+
+    function cancelRegistration() {
+      document.getElementById('step-otp').style.display = 'none';
+      document.getElementById('step-details').style.display = 'block';
+      document.getElementById('loginLinkDiv').style.display = 'flex';
+      document.getElementById('regOtpInput').value = '';
+    }
+  </script>
+</body>
+</html>

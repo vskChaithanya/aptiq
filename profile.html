@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Profile | AptIQ</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* Override app layout to match the new dashboard top-nav style */
+    .app { display: block; max-width: 1000px; margin: 0 auto; padding-top: 20px; }
+    
+    /* Top Navigation Bar */
+    .top-nav {
+      display: flex; justify-content: space-between; align-items: center;
+      background: #fff; padding: 15px 25px; border-radius: 16px;
+      box-shadow: var(--shadow-lg); margin-bottom: 25px; border: 1px solid rgba(14,30,60,0.04);
+    }
+
+    /* Profile Info Grid */
+    .profile-grid { 
+      display: grid; 
+      grid-template-columns: 1fr 1fr; 
+      gap: 16px; 
+      margin-bottom: 25px; 
+    }
+    .info-box { 
+      background: var(--bg-2); 
+      padding: 16px 20px; 
+      border-radius: 12px; 
+      border: 1px solid rgba(14,30,60,0.04);
+    }
+    .info-label { font-size: 12px; color: var(--muted); margin-bottom: 4px; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;}
+    .info-value { font-weight: 700; font-size: 16px; color: #0f172a; }
+    
+    /* Make the email span full width on smaller screens */
+    .full-width { grid-column: 1 / -1; }
+
+    @media (max-width: 600px) {
+      .profile-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    
+    <header class="top-nav">
+      <div class="brand">
+        <div class="title" style="font-size: 22px;">AptIQ Portal</div>
+      </div>
+      <div style="display: flex; gap: 12px; align-items: center;">
+        <button onclick="window.location.href='dashboard.html'" class="btn ghost" style="padding: 10px 16px;">Dashboard</button>
+        <button id="logoutBtn" class="btn primary" style="padding: 10px 16px;">Log Out</button>
+      </div>
+    </header>
+
+    <main class="content" style="display: block;">
+      <section class="card" style="width: 100%; max-width: 700px; margin: 0 auto;">
+        <h2 style="margin-top: 0;">Student Profile</h2>
+        <p class="muted" style="margin-bottom: 25px;">Manage your university account details and security.</p>
+        
+        <div class="profile-grid">
+          <div class="info-box">
+            <div class="info-label">Full Name</div>
+            <div class="info-value" id="userName">Loading...</div>
+          </div>
+          <div class="info-box">
+            <div class="info-label">Hall Ticket Number</div>
+            <div class="info-value" id="userHallTicket">Loading...</div>
+          </div>
+          <div class="info-box full-width">
+            <div class="info-label">Registered University Email</div>
+            <div class="info-value" id="userEmail">Loading...</div>
+          </div>
+        </div>
+
+        <h3 style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 25px;">Change Password</h3>
+        <form id="changePasswordForm" style="display: flex; flex-direction: column; gap: 15px; margin-top: 15px;">
+          <input type="password" id="oldPass" placeholder="Current Password" required style="padding: 12px; border-radius: 10px; border: 1px solid rgba(15,23,42,0.1);">
+          <input type="password" id="newPass" placeholder="New Password" required style="padding: 12px; border-radius: 10px; border: 1px solid rgba(15,23,42,0.1);">
+          <div id="cpMsg" style="font-size: 14px; display: none; padding: 10px; border-radius: 8px;"></div>
+          <button type="submit" class="btn primary" style="width: 200px; padding: 12px;">Update Password</button>
+        </form>
+
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // 1. Auth Guard
+    const token = localStorage.getItem('aptiq_token');
+    if (!token) window.location.href = 'login.html';
+
+    // 2. Load User Data
+    const user = JSON.parse(localStorage.getItem('aptiq_user') || '{}');
+    document.getElementById('userName').textContent = user.name || 'Not provided';
+    document.getElementById('userHallTicket').textContent = user.hallTicket || 'Not provided';
+    document.getElementById('userEmail').textContent = user.email || 'Unknown';
+
+    // 3. Handle Password Change
+    document.getElementById('changePasswordForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const oldPassword = document.getElementById('oldPass').value;
+      const newPassword = document.getElementById('newPass').value;
+      const msg = document.getElementById('cpMsg');
+
+      msg.style.display = 'none'; // reset message
+
+      try {
+        const res = await fetch('http://localhost:3000/api/change-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token, oldPassword, newPassword })
+        });
+        const data = await res.json();
+        
+        msg.textContent = data.message;
+        msg.style.display = 'block';
+        
+        if(res.ok) {
+          msg.style.backgroundColor = '#ecfdf5'; // light green
+          msg.style.color = '#065f46'; // dark green text
+          document.getElementById('changePasswordForm').reset();
+        } else {
+          msg.style.backgroundColor = '#fef2f2'; // light red
+          msg.style.color = '#991b1b'; // dark red text
+        }
+      } catch (err) {
+        msg.textContent = 'Server error. Please try again.';
+        msg.style.display = 'block';
+        msg.style.backgroundColor = '#fef2f2';
+        msg.style.color = '#991b1b';
+      }
+    });
+
+    // 4. Handle Logout
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      localStorage.clear();
+      window.location.href = 'login.html';
+    });
+  </script>
+</body>
+</html>

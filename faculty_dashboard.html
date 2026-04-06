@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Faculty Dashboard | AptIQ</title>
+  <style>
+    * { box-sizing: border-box; font-family: sans-serif; }
+    
+    body { 
+      display: block !important; 
+      overflow-y: auto !important; 
+      overflow-x: hidden !important; 
+      min-height: 100vh; 
+      margin: 0 !important;
+      padding: 0 0 80px 0 !important; 
+      background-color: #f8fafc; 
+    }
+
+    .app { display: block; width: 95%; max-width: 1100px; margin: 30px auto !important; }
+
+    .top-nav {
+      display: flex; justify-content: space-between; align-items: center;
+      background: #fff; padding: 20px 30px; border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 35px; border: 1px solid rgba(14,30,60,0.04);
+      flex-wrap: wrap; gap: 15px;
+    }
+
+    .card { background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 40px; border: 1px solid rgba(14,30,60,0.04); }
+    
+    .task-form { display: flex; flex-direction: column; gap: 15px; }
+    .task-form input, .task-form select { padding: 14px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 16px; width: 100%; outline: none; background: #fff; }
+    
+    .btn { padding: 12px 24px; border-radius: 8px; font-weight: bold; font-size: 15px; border: none; cursor: pointer; display: inline-block; transition: 0.2s; }
+    .btn:hover { opacity: 0.9; }
+    
+    table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; border: 1px solid #e2e8f0; }
+    th, td { padding: 16px; text-align: left; border-bottom: 1px solid #f1f5f9; font-size: 15px; }
+    th { background: #1e293b; color: white; font-size: 16px; font-weight: bold; }
+    .muted { color: #64748b; font-size: 13px; }
+  </style>
+</head>
+<body>
+
+  <div class="app">
+    <header class="top-nav">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="font-size: 28px;">👨‍🏫</span>
+        <h2 style="margin:0; color: #0f172a; font-size: 24px;">Faculty Control Center</h2>
+      </div>
+      <button onclick="localStorage.clear(); window.location.href='login.html'" class="btn" style="background: #ef4444; color: white;">Log Out</button>
+    </header>
+
+    <div class="card" style="border-left: 6px solid #8b5cf6;">
+      <h3 style="margin-top: 0; font-size: 22px; color: #0f172a;">Assign Placement Task</h3>
+      <p style="color: #64748b; font-size: 15px; margin-bottom: 20px;">Creates a 40-question MCQ test + 2 selected Python coding challenges.</p>
+      
+      <form id="taskForm" class="task-form">
+        <input type="text" id="taskName" placeholder="Task Name (e.g., Final Placement Exam)" required>
+        
+        <div style="margin-top: 10px;">
+          <h4 style="margin: 0 0 10px 0; color: #0f172a; font-size: 16px;">Select exactly 2 Python Questions:</h4>
+          <div id="codingList" style="display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0;">
+            <span style="color: #64748b; font-size: 14px;">Loading Python questions...</span>
+          </div>
+        </div>
+
+        <button type="submit" class="btn" style="background: #8b5cf6; color: white; padding: 16px; font-size: 16px; margin-top: 10px;">Assign Complete Task</button>
+      </form>
+      <div id="taskMsg" style="margin-top: 15px; font-weight: bold; font-size: 15px; text-align: center;"></div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-top: 0; font-size: 22px; color: #0f172a; margin-bottom: 20px;">Manage Active Tasks</h3>
+      
+      <div style="background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 20px; display: flex; gap: 15px; align-items: center;">
+        <select id="taskDeleteSelect" class="task-form" style="flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 15px; outline: none;">
+          <option value="">-- Select a Task to Delete --</option>
+        </select>
+        <button onclick="deleteSelectedTask()" class="btn" style="background: #ef4444; color: white; padding: 12px 24px;">🗑️ Delete Task</button>
+      </div>
+
+      <div style="overflow-x: auto;">
+        <table id="manageTasksTable">
+          <thead>
+            <tr>
+              <th>Task Name</th>
+              <th>Composition</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="activeTasksData">
+            <tr><td colspan="3" style="text-align: center; color: #64748b; padding: 30px;">Loading tasks...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-top: 0; font-size: 22px; color: #0f172a; margin-bottom: 20px;">Student Analytics</h3>
+      <div style="overflow-x: auto;">
+        <table id="studentTable">
+          <thead>
+            <tr>
+              <th>Student Details</th>
+              <th>Completed Tasks (Marks & Time)</th>
+              <th>Practice Score</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="studentData">
+            <tr><td colspan="4" style="text-align: center; color: #64748b; padding: 30px;">Loading student data...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const BASE_URL = 'http://localhost:3000/api';
+
+    async function loadCodingOptions() {
+      try {
+        const res = await fetch(`${BASE_URL}/coding-questions`);
+        const codingQs = await res.json();
+        const listDiv = document.getElementById('codingList');
+        listDiv.innerHTML = '';
+        
+        if (codingQs.length === 0) {
+          listDiv.innerHTML = '<span style="color: #dc2626; font-weight:bold;">No coding questions found. Did you run node seed.js?</span>';
+          return;
+        }
+
+        codingQs.forEach(q => {
+          listDiv.innerHTML += `
+            <label style="display: flex; align-items: flex-start; gap: 12px; cursor: pointer; padding: 8px; border-radius: 6px; transition: 0.2s; border: 1px solid transparent;">
+              <input type="checkbox" name="codingSelection" value="${q._id}" class="coding-checkbox" style="margin-top: 4px; transform: scale(1.2);">
+              <div style="display: flex; flex-direction: column;">
+                <span style="font-weight: bold; color: #0f172a; font-size: 15px;">${q.title}</span>
+                <span style="color: #64748b; font-size: 13px; margin-top: 2px;">${q.problemStatement}</span>
+              </div>
+            </label>
+          `;
+        });
+      } catch (err) { 
+        document.getElementById('codingList').innerHTML = '<span style="color:#dc2626;">Error loading questions. Is the server running?</span>';
+      }
+    }
+
+    document.getElementById('taskForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const title = document.getElementById('taskName').value;
+      const msg = document.getElementById('taskMsg');
+      
+      const checkboxes = document.querySelectorAll('.coding-checkbox:checked');
+      const codingIds = Array.from(checkboxes).map(cb => cb.value);
+
+      if (codingIds.length !== 2) {
+        msg.innerHTML = `❌ You selected <b>${codingIds.length}</b>. Please select EXACTLY 2 Python questions.`;
+        msg.style.color = "#dc2626";
+        return;
+      }
+
+      msg.textContent = "Packaging task... Please wait.";
+      msg.style.color = "#475569";
+
+      try {
+        const res = await fetch(`${BASE_URL}/admin/tasks`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title, codingIds })
+        });
+        const data = await res.json();
+        
+        msg.textContent = data.message;
+        msg.style.color = res.ok ? "#10b981" : "#ef4444";
+        
+        if(res.ok) {
+          document.getElementById('taskForm').reset();
+          fetchActiveTasks(); 
+        }
+      } catch (err) {
+        msg.textContent = "Server Offline. Ensure node server.js is running.";
+        msg.style.color = "#dc2626";
+      }
+    });
+
+    // Fetches active tasks for BOTH the table and the new Dropdown Menu
+    async function fetchActiveTasks() {
+      try {
+        const res = await fetch(`${BASE_URL}/tasks`);
+        const tasks = await res.json();
+        const tbody = document.getElementById('activeTasksData');
+        const selectMenu = document.getElementById('taskDeleteSelect');
+        
+        tbody.innerHTML = '';
+        selectMenu.innerHTML = '<option value="">-- Select a Task to Delete --</option>';
+
+        if(tasks.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: #94a3b8; padding: 30px; font-size: 16px;">No active tasks assigned.</td></tr>';
+          return;
+        }
+
+        tasks.forEach(task => {
+          const mcqCount = task.questions ? task.questions.length : 0;
+          const codeCount = task.codingQuestions ? task.codingQuestions.length : 0;
+          
+          // Add to Table
+          tbody.innerHTML += `
+            <tr>
+              <td><strong style="font-size: 16px; color: #0f172a;">${task.title}</strong></td>
+              <td><span style="background: #f1f5f9; padding: 6px 12px; border-radius: 6px; font-size: 13px; color: #475569; border: 1px solid #e2e8f0;">${mcqCount} MCQs + ${codeCount} Python Tasks</span></td>
+              <td><span style="color: #10b981; font-weight: bold; font-size: 13px;">🟢 Active</span></td>
+            </tr>
+          `;
+          
+          // Add to Dropdown
+          selectMenu.innerHTML += `<option value="${task._id}">${task.title}</option>`;
+        });
+      } catch (err) {
+        document.getElementById('activeTasksData').innerHTML = '<tr><td colspan="3" style="color:#dc2626; text-align:center;">Failed to load tasks.</td></tr>';
+      }
+    }
+
+    // Handles the stylish Dropdown Deletion
+    async function deleteSelectedTask() {
+      const selectMenu = document.getElementById('taskDeleteSelect');
+      const taskId = selectMenu.value;
+      const taskName = selectMenu.options[selectMenu.selectedIndex].text;
+
+      if(!taskId) {
+        alert("Please select a task from the dropdown first.");
+        return;
+      }
+
+      if(confirm(`Are you sure you want to delete the task: "${taskName}"? It will be instantly removed from all student dashboards.`)) {
+        try {
+          const token = localStorage.getItem('aptiq_token');
+          const res = await fetch(`${BASE_URL}/admin/tasks/${taskId}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          
+          if(res.ok) {
+            fetchActiveTasks(); // Refresh list after deletion
+            alert(`Task "${taskName}" deleted successfully.`);
+          } else {
+            alert("Failed to delete task. You may not have authorization.");
+          }
+        } catch(err) {
+          alert("Server error while trying to delete.");
+        }
+      }
+    }
+
+    async function fetchStudents() {
+      try {
+        const response = await fetch(`${BASE_URL}/admin/students`);
+        if (!response.ok) throw new Error("Backend failed to load students.");
+        
+        const allUsers = await response.json();
+        const tbody = document.getElementById('studentData');
+        tbody.innerHTML = ''; 
+
+        const students = allUsers.filter(user => user.role === 'student' || !user.role);
+
+        if(students.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #94a3b8; padding: 30px; font-size: 16px;">No students have registered yet.</td></tr>';
+          return;
+        }
+
+        students.forEach(student => {
+          const historyArray = Array.isArray(student.testHistory) ? student.testHistory : [];
+          
+          const taskBadges = historyArray
+            .filter(test => test.topic && test.topic.startsWith('TASK:'))
+            .map(test => `
+              <div style="background: #eef2ff; color: #4f46e5; padding: 12px; border-radius: 8px; margin-bottom: 8px; border: 1px solid #c7d2fe;">
+                <strong style="font-size: 15px;">📝 ${test.topic.replace('TASK: ', '')}</strong> <br>
+                <div style="font-size: 13px; color: #4338ca; margin-top: 6px; display: flex; flex-direction: column; gap: 3px;">
+                  <span>⏱️ Time: ${test.timeTaken || 'Unknown'}</span>
+                  <span>🏆 MCQs: <b>${test.score}/40</b></span>
+                  <span>💻 Coding: <b>${test.codingScore || 0}/60</b></span>
+                </div>
+              </div>
+            `).join('');
+
+          const row = `
+            <tr>
+              <td>
+                <strong style="font-size: 18px; color: #0f172a;">${student.name}</strong><br>
+                <span style="color: #475569; font-weight: bold; font-size: 14px; display: inline-block; margin-top: 4px;">ID: ${student.hallTicket}</span><br>
+                <span class="muted" style="font-size: 13px;">${student.email}</span>
+              </td>
+              <td style="vertical-align: top;">${taskBadges || '<span style="color: #94a3b8; font-style: italic;">No tasks completed</span>'}</td>
+              <td style="vertical-align: top;"><span style="background: #f1f5f9; color: #334155; padding: 6px 12px; border-radius: 6px; font-weight: bold; border: 1px solid #e2e8f0;">${student.highestScore || 0} / 15</span></td>
+              <td style="vertical-align: top;"><button onclick="deleteStudent('${student._id}')" style="background: #ef4444; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; transition: 0.2s;">Remove</button></td>
+            </tr>
+          `;
+          tbody.innerHTML += row;
+        });
+      } catch(err) {
+        document.getElementById('studentData').innerHTML = `
+          <tr><td colspan="4" style="color:#dc2626; text-align:center; padding: 30px; background: #fef2f2; font-size: 16px;">
+            <b>🚨 ERROR:</b> ${err.message}
+          </td></tr>`;
+      }
+    }
+
+    async function deleteStudent(id) {
+      if (confirm("Delete student permanently from the database?")) {
+        const token = localStorage.getItem('aptiq_token');
+        await fetch(`${BASE_URL}/admin/students/${id}`, { 
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        fetchStudents();
+      }
+    }
+
+    loadCodingOptions();
+    fetchActiveTasks();
+    fetchStudents();
+  </script>
+</body>
+</html>
