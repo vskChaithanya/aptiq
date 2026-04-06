@@ -162,7 +162,7 @@
 
     async function loadTasks() {
       try {
-        const res = await fetch('http://localhost:3000/api/tasks');
+        const res = await fetch('/api/tasks');
         if (!res.ok) throw new Error("Backend failed to load tasks.");
         
         const tasks = await res.json();
