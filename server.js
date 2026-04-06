@@ -14,7 +14,7 @@ const CodingQuestion = require('./models/CodingQuestion');
 const app = express();
 app.use(express.json());
 app.use(cors());
-app.use(express.static(__dirname));
+app.use(express.static(__dirname, { index: 'login.html' }));
 
 const JWT_SECRET = 'super_secret_aptiq_key_2026';
 
@@ -253,6 +253,9 @@ app.delete('/api/admin/students/:id', async (req, res) => {
 });
 
 app.get('/', (req, res) => res.redirect('/login.html'));
+app.get('/', (req, res) => {
+    res.sendFile(__dirname + '/login.html');
+});
 
 // --- UPDATE THIS BLOCK ---
 const PORT = process.env.PORT || 3000;
