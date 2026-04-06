@@ -25,13 +25,12 @@ mongoose.connect(process.env.MONGO_URI)
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     host: 'smtp.gmail.com',
-    port: 465,
-    secure: true, // true for 465
+    port: 587,         // Changed from 465
+    secure: false,     // MUST be false for port 587
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS
     },
-    // Adding this specific block helps prevent cloud server timeouts
     tls: {
         rejectUnauthorized: false
     }
