@@ -23,11 +23,18 @@ mongoose.connect(process.env.MONGO_URI)
   .catch(err => console.error('Could not connect to MongoDB:', err));
 
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: 'aptiq.noreply@gmail.com', 
-    pass: 'supsojhzmgxmujrg'    
-  }
+    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true, // true for 465
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+    },
+    // Adding this specific block helps prevent cloud server timeouts
+    tls: {
+        rejectUnauthorized: false
+    }
 });
 
 const registrationVault = {};
