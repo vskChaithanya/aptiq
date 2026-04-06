@@ -324,7 +324,7 @@
       btn.textContent = 'Signing in...';
 
       try {
-        const res = await fetch('http://localhost:3000/api/login', {
+        const res = await fetch('/api/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password })
@@ -375,7 +375,7 @@
       btn.textContent = "Sending..."; btn.disabled = true;
 
       try {
-        const res = await fetch('http://localhost:3000/api/forgot-password/send-otp', {
+        const res = await fetch('/api/forgot-password/send-otp', {
           method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email })
         });
         if (res.ok) {
@@ -393,7 +393,7 @@
       if (otp.length !== 6) return showMessage("Enter a 6-digit OTP.", false);
 
       try {
-        const res = await fetch('http://localhost:3000/api/forgot-password/verify-otp', {
+        const res = await fetch('/api/forgot-password/verify-otp', {
           method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: resetEmailTarget, otp })
         });
         if (res.ok) {
@@ -410,7 +410,7 @@
       if (newPassword.length < 5) return showMessage("Password too short.", false);
 
       try {
-        const res = await fetch('http://localhost:3000/api/forgot-password/reset', {
+        const res = await fetch('/api/forgot-password/reset', {
           method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: resetEmailTarget, otp, newPassword })
         });
         if (res.ok) {
