@@ -22,21 +22,22 @@ mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('Connected to MongoDB Atlas successfully!'))
   .catch(err => console.error('Could not connect to MongoDB:', err));
 
-const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 465,
-    secure: true,
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-    },
-    tls: {
-        rejectUnauthorized: false
-    },
-    // THE MAGIC FIX FOR RENDER
-    // This forces the server to use normal IPv4 and stops the timeout crash!
-    family: 4 
-});
+const { Resend } = require('resend');
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+const sendOTP = async (email, otp) => {
+  try {
+    await resend.emails.send({
+      from: 'AptIQ <onboarding@resend.dev>', // Keep this exactly as onboarding@resend.dev for the free tier
+      to: email,
+      subject: 'Your AptIQ Verification Code',
+      html: `<strong>Your OTP is: ${otp}</strong>`
+    });
+    console.log('Email sent successfully via Resend!');
+  } catch (error) {
+    console.error('Resend Error:', error);
+  }
+};
 
 const registrationVault = {};
 const forgotPasswordVault = {};
