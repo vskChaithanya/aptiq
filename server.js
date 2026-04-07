@@ -25,17 +25,33 @@ mongoose.connect(process.env.MONGO_URI)
 const { Resend } = require('resend');
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+// Replace your Resend code and sendOTP function with this:
+
 const sendOTP = async (email, otp) => {
   try {
-    await resend.emails.send({
-      from: 'AptIQ <onboarding@resend.dev>', // Keep this exactly as onboarding@resend.dev for the free tier
-      to: email,
-      subject: 'Your AptIQ Verification Code',
-      html: `<strong>Your OTP is: ${otp}</strong>`
+    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'api-key': process.env.BREVO_API_KEY
+      },
+      body: JSON.stringify({
+        sender: { email: 'aptiq.noreply@gmail.com', name: 'AptIQ' }, // This MUST be the email you used to sign up for Brevo
+        to: [{ email: email }], // This is the dynamic email the student types into your website!
+        subject: 'Your AptIQ Verification Code',
+        htmlContent: `<strong>Your OTP is: ${otp}</strong>`
+      })
     });
-    console.log('Email sent successfully via Resend!');
+
+    if (!response.ok) {
+      const errText = await response.text();
+      console.error("Brevo Error:", errText);
+    } else {
+      console.log(`Success! OTP sent to ${email}`);
+    }
   } catch (error) {
-    console.error('Resend Error:', error);
+    console.error('Server Fetch Error:', error);
   }
 };
 
