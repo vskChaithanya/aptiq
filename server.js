@@ -3,7 +3,6 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const nodemailer = require('nodemailer');
 require('dotenv').config();
 
 const User = require('./models/User');
@@ -22,47 +21,15 @@ mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('Connected to MongoDB Atlas successfully!'))
   .catch(err => console.error('Could not connect to MongoDB:', err));
 
-const { Resend } = require('resend');
-const resend = new Resend(process.env.RESEND_API_KEY);
-
-// Replace your Resend code and sendOTP function with this:
-
-const sendOTP = async (email, otp) => {
-  try {
-    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'api-key': process.env.BREVO_API_KEY
-      },
-      body: JSON.stringify({
-        sender: { email: 'aptiq.noreply@gmail.com', name: 'AptIQ' }, // This MUST be the email you used to sign up for Brevo
-        to: [{ email: email }], // This is the dynamic email the student types into your website!
-        subject: 'Your AptIQ Verification Code',
-        htmlContent: `<strong>Your OTP is: ${otp}</strong>`
-      })
-    });
-
-    if (!response.ok) {
-      const errText = await response.text();
-      console.error("Brevo Error:", errText);
-    } else {
-      console.log(`Success! OTP sent to ${email}`);
-    }
-  } catch (error) {
-    console.error('Server Fetch Error:', error);
-  }
-};
-
 const registrationVault = {};
 const forgotPasswordVault = {};
 
+// --- REGISTER ROUTE ---
 app.post('/api/register/send-otp', async (req, res) => {
   try {
     const { name, hallTicket, email, password, role } = req.body;
     
-    // 🚨 UPDATED FACULTY VALIDATION HERE 🚨
+    // 🚨 FACULTY/STUDENT VALIDATION 🚨
     if (role === 'faculty' && email !== 'aptiq.noreply@gmail.com') {
         return res.status(400).json({ message: 'Faculty access is restricted to the admin email (aptiq.noreply@gmail.com).' });
     }
@@ -76,17 +43,29 @@ app.post('/api/register/send-otp', async (req, res) => {
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     registrationVault[email] = { otp, userData: { name, hallTicket, email, password, role } };
 
+    // --- BREVO EMAIL SENDING ---
     try {
-      await transporter.sendMail({
-        from: '"AptIQ Support" <aptiq.noreply@gmail.com>', 
-        to: email,
-        subject: 'Welcome to AptIQ - Verify your Email',
-        text: `Hello ${name},\n\nYour OTP to verify your email and complete your AptIQ registration is: ${otp}\n\nWelcome aboard!\n\n- The AptIQ Team`
+      const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'api-key': process.env.BREVO_API_KEY
+        },
+        body: JSON.stringify({
+          sender: { email: 'aptiq.noreply@gmail.com', name: 'AptIQ Support' },
+          to: [{ email: email }],
+          subject: 'Welcome to AptIQ - Verify your Email',
+          htmlContent: `<p>Hello ${name},</p><p>Your OTP to verify your email and complete your AptIQ registration is: <strong>${otp}</strong></p><p>Welcome aboard!</p><p>- The AptIQ Team</p>`
+        })
       });
+
+      if (!response.ok) throw new Error("Brevo API failed");
       res.json({ message: 'OTP sent to your email!' });
+      
     } catch (emailErr) {
-      console.log("🚨 NODEMAILER ERROR:", emailErr.message);
-      return res.status(500).json({ message: 'Email failed to send. Check backend Gmail credentials.' });
+      console.log("🚨 BREVO ERROR:", emailErr.message);
+      return res.status(500).json({ message: 'Email failed to send. Check server logs.' });
     }
 
   } catch (err) { res.status(500).json({ message: 'Server error during registration setup.' }); }
@@ -125,6 +104,7 @@ app.post('/api/login', async (req, res) => {
   } catch (err) { res.status(500).json({ message: 'Server error during login.' }); }
 });
 
+// --- FORGOT PASSWORD ROUTE ---
 app.post('/api/forgot-password/send-otp', async (req, res) => {
   const { email } = req.body;
   try {
@@ -134,17 +114,29 @@ app.post('/api/forgot-password/send-otp', async (req, res) => {
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     forgotPasswordVault[email] = otp;
 
+    // --- BREVO EMAIL SENDING ---
     try {
-      await transporter.sendMail({
-        from: '"AptIQ Support" <aptiq.noreply@gmail.com>', 
-        to: email,
-        subject: 'AptIQ Portal - Password Reset OTP',
-        text: `Hello,\n\nYour OTP to reset your AptIQ password is: ${otp}\n\nIf you did not request this, please ignore this email.\n\n- The AptIQ Team`
+      const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'api-key': process.env.BREVO_API_KEY
+        },
+        body: JSON.stringify({
+          sender: { email: 'aptiq.noreply@gmail.com', name: 'AptIQ Support' },
+          to: [{ email: email }],
+          subject: 'AptIQ Portal - Password Reset OTP',
+          htmlContent: `<p>Hello,</p><p>Your OTP to reset your AptIQ password is: <strong>${otp}</strong></p><p>If you did not request this, please ignore this email.</p><p>- The AptIQ Team</p>`
+        })
       });
+
+      if (!response.ok) throw new Error("Brevo API failed");
       res.json({ message: "OTP Sent successfully!" });
+      
     } catch (emailErr) {
-      console.log("🚨 NODEMAILER ERROR:", emailErr.message);
-      return res.status(500).json({ message: 'Email failed to send. Check backend Gmail credentials.' });
+      console.log("🚨 BREVO ERROR:", emailErr.message);
+      return res.status(500).json({ message: 'Email failed to send. Check server logs.' });
     }
 
   } catch (err) { res.status(500).json({ message: "Server error." }); }
@@ -282,7 +274,6 @@ app.get('/', (req, res) => {
     res.sendFile(__dirname + '/login.html');
 });
 
-// --- UPDATE THIS BLOCK ---
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
