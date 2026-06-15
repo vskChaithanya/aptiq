@@ -30,7 +30,7 @@ function StudentDashboard() {
     // 2. Fetch Tasks from Backend
     const fetchTasks = async () => {
       try {
-        const res = await fetch('http://localhost:3000/api/tasks'); // Point to Node backend
+        const res = await fetch('https://aptiqforu.onrender.com/api/tasks'); // Point to Node backend
         if (!res.ok) throw new Error("Backend failed to load tasks.");
         const data = await res.json();
         setTasks(data);

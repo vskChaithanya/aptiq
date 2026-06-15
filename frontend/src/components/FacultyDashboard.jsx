@@ -35,7 +35,7 @@ function FacultyDashboard() {
   // --- API CALLS: FETCHING DATA ---
   const fetchCodingOptions = async () => {
     try {
-      const res = await fetch('http://localhost:3000/api/coding-questions');
+      const res = await fetch('https://aptiqforu.onrender.com/api/coding-questions');
       const data = await res.json();
       setCodingOptions(data);
     } catch (err) {
@@ -45,7 +45,7 @@ function FacultyDashboard() {
 
   const fetchActiveTasks = async () => {
     try {
-      const res = await fetch('http://localhost:3000/api/tasks');
+      const res = await fetch('https://aptiqforu.onrender.com/api/tasks');
       const data = await res.json();
       setActiveTasks(data);
     } catch (err) {
@@ -55,7 +55,7 @@ function FacultyDashboard() {
 
   const fetchStudents = async () => {
     try {
-      const res = await fetch('http://localhost:3000/api/admin/students');
+      const res = await fetch('https://aptiqforu.onrender.com/api/admin/students');
       if (res.ok) {
         const allUsers = await res.json();
         const studentUsers = allUsers.filter(user => user.role === 'student' || !user.role);
@@ -89,7 +89,7 @@ function FacultyDashboard() {
     setTaskMsg({ text: "Packaging task... Please wait.", isError: false });
 
     try {
-      const res = await fetch('http://localhost:3000/api/admin/tasks', {
+      const res = await fetch('https://aptiqforu.onrender.com/api/admin/tasks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title: taskName, codingIds: selectedCodingIds })

@@ -36,7 +36,7 @@ function Register() {
     setLoading(true);
 
     try {
-      const res = await fetch('http://localhost:3000/api/register/send-otp', {
+      const res = await fetch('https://aptiqforu.onrender.com/api/register/send-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, hallTicket, email, password, role })
@@ -62,7 +62,7 @@ function Register() {
     setLoading(true);
 
     try {
-      const res = await fetch('http://localhost:3000/api/register/verify', {
+      const res = await fetch('https://aptiqforu.onrender.com/api/register/verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, otp })

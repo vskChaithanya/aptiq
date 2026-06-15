@@ -294,7 +294,7 @@ function AssessmentRoom() {
     const finalTopic = isTaskMode ? `TASK: ${taskTitle}` : taskTitle;
 
     try {
-      const res = await fetch('http://localhost:3000/api/save-score', {
+      const res = await fetch('https://aptiqforu.onrender.com/api/save-score', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 

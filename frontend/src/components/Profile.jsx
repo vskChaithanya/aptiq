@@ -47,7 +47,7 @@ function Profile() {
     const token = localStorage.getItem('aptiq_token');
 
     try {
-      const res = await fetch('http://localhost:3000/api/change-password', {
+      const res = await fetch('https://aptiqforu.onrender.com/api/change-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token, oldPassword, newPassword })
