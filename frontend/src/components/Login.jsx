@@ -121,7 +121,7 @@ function Login() {
     setLoading(true);
 
     try {
-      const res = await fetch('http://localhost:3000/api/login', { // Point to Node backend
+      const res = await fetch('https://aptiqforu.onrender.com/api/login', { // Point to Node backend
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
@@ -156,7 +156,7 @@ function Login() {
     setLoading(true);
 
     try {
-      const res = await fetch('http://localhost:3000/api/forgot-password/send-otp', {
+      const res = await fetch('https://aptiqforu.onrender.com/api/forgot-password/send-otp', {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: resetEmail })
       });
       if (res.ok) {
@@ -173,7 +173,7 @@ function Login() {
   const verifyOTP = async () => {
     if (otp.length !== 6) return displayMessage("Enter a 6-digit OTP.", false);
     try {
-      const res = await fetch('http://localhost:3000/api/forgot-password/verify-otp', {
+      const res = await fetch('https://aptiqforu.onrender.comcd backend/api/forgot-password/verify-otp', {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: resetEmail, otp })
       });
       if (res.ok) {
@@ -186,7 +186,7 @@ function Login() {
   const resetPassword = async () => {
     if (newPassword.length < 5) return displayMessage("Password too short.", false);
     try {
-      const res = await fetch('http://localhost:3000/api/forgot-password/reset', {
+      const res = await fetch('https://aptiqforu.onrender.com/api/forgot-password/reset', {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: resetEmail, otp, newPassword })
       });
       if (res.ok) {
