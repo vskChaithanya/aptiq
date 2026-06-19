@@ -6,6 +6,10 @@ import '../App.css';
 function AssessmentRoom() {
   const navigate = useNavigate();
   
+  // --- DYNAMIC API URL SETUP ---
+  // This ensures it uses your live Render backend instead of localhost
+  const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://aptiqforu.onrender.com';
+  
   // --- STATE MANAGEMENT ---
   const [testPhase, setTestPhase] = useState('loading'); // loading, mcq, coding, result, error
   const [errorMsg, setErrorMsg] = useState('');
@@ -59,7 +63,8 @@ function AssessmentRoom() {
 
         if (taskMode) {
           const taskId = localStorage.getItem('aptiq_task_id');
-          const res = await fetch(`http://localhost:3000/api/tasks/${taskId}`);
+          // FIXED: Replaced localhost with dynamic API_BASE_URL
+          const res = await fetch(`${API_BASE_URL}/api/tasks/${taskId}`);
           if(!res.ok) throw new Error("Failed to load task");
           const taskData = await res.json();
           fetchedQs = taskData.questions || [];
@@ -67,7 +72,8 @@ function AssessmentRoom() {
         } else {
           const topic = localStorage.getItem('aptiq_current_topic');
           const level = localStorage.getItem('aptiq_current_level');
-          const res = await fetch(`http://localhost:3000/api/questions?topic=${topic}&level=${level}`);
+          // FIXED: Replaced localhost with dynamic API_BASE_URL
+          const res = await fetch(`${API_BASE_URL}/api/questions?topic=${topic}&level=${level}`);
           if(!res.ok) throw new Error("Failed to load questions");
           fetchedQs = await res.json();
           
@@ -294,7 +300,8 @@ function AssessmentRoom() {
     const finalTopic = isTaskMode ? `TASK: ${taskTitle}` : taskTitle;
 
     try {
-      const res = await fetch('https://aptiqforu.onrender.com/api/save-score', {
+      // FIXED: Also updated the save-score endpoint to use dynamic URL for consistency
+      const res = await fetch(`${API_BASE_URL}/api/save-score`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 

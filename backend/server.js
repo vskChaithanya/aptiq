@@ -13,7 +13,11 @@ const CodingQuestion = require('./models/CodingQuestion');
 const app = express();
 app.use(cors());
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  origin: "https://aptiq-c4lg.onrender.com",
+  methods: ["GET", "POST", "DELETE"],
+  credentials: true
+}));
 
 
 const JWT_SECRET = 'super_secret_aptiq_key_2026';
