@@ -1,109 +1,102 @@
-# AptIQ 🚀
+=============================================================================
+   ___         __  ________ 
+  / _ | ___   / /_/  _/ __ \
+ / __ |/ _ \ / __// // /_/ /
+/_/ |_/ .__/ \__/___/\___\_\
+     /_/                    
 
-AptIQ is a comprehensive, full-stack MERN application designed to facilitate secure, topic-based aptitude assessments and technical coding rounds. Built to streamline the evaluation process for both students and faculty, it features real-time Python code execution in the browser, live proctoring, and automated test-case evaluation.
+=============================================================================
+> PROJECT     : AptIQ 
+> VERSION     : 1.0.0
+> STACK       : MERN (MongoDB, Express, React, Node.js)
+> ENVIRONMENT : Web / WebAssembly
+=============================================================================
 
-## ✨ Key Features
+[![Visit AptIQ Website](https://img.shields.io/badge/🚀_Visit_AptIQ_Live-10b981?style=for-the-badge&logo=vercel&logoColor=white)](https://aptiq-c4lg.onrender.com)
 
-*   **Role-Based Access Control:** Distinct portals for 'Students' and 'Faculty' with restricted data access.
-*   **Secure Authentication:** JWT-based sessions, bcrypt password hashing, and email-based OTP verification for registration and password resets.
-*   **Interactive Assessments:** 
-    *   Multiple Choice Questions (MCQs) mapped to specific aptitude topics.
-    *   Integrated Code Editor using `@monaco-editor/react`.
-*   **In-Browser Python Execution:** Utilizes Pyodide to run and evaluate Python code securely within the client's browser, eliminating backend server load.
-*   **Smart Auto-Evaluation:** Automatically tests submitted code against dynamic test cases and assigns weighted scores.
-*   **Live Proctoring:** Integrates webcam access during technical rounds to ensure assessment integrity.
-*   **Faculty Dashboard:** Allows instructors to create assignments, bundle questions into Tasks, and manage student records.
+![React](https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB)
+![NodeJS](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white)
+![Express.js](https://img.shields.io/badge/express.js-%23404d59.svg?style=for-the-badge&logo=express&logoColor=%2361DAFB)
+![MongoDB](https://img.shields.io/badge/MongoDB-%234ea94b.svg?style=for-the-badge&logo=mongodb&logoColor=white)
+![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
 
-## 🛠️ Tech Stack
+---
 
-**Frontend**
-*   React.js (Vite)
-*   @monaco-editor/react (IDE interface)
-*   Pyodide (WASM Python execution)
-*   React Router DOM
+### [ 01. OVERVIEW ]
+AptIQ is a secure, full-stack aptitude and coding assessment platform. It brings the power of a technical interview environment directly to the browser. By combining standard MCQ logic with a secure, WebAssembly-powered Python execution engine, it allows institutions to test, monitor, and auto-evaluate students in real time.
 
-**Backend**
-*   Node.js & Express.js
-*   MongoDB Atlas & Mongoose (Database)
-*   JSON Web Tokens (JWT) & Bcrypt (Security)
-*   Brevo API (Transactional Emails/OTP)
+---
 
-**Deployment**
-*   Hosted on [Render](https://render.com/)
+### [ 02. SYSTEM FEATURES ]
+* [x] **CLIENT-SIDE EXECUTION** : Runs Python scripts natively in the browser via Pyodide.
+* [x] **LIVE PROCTORING** : Automated webcam streaming during technical rounds.
+* [x] **SMART EVALUATION** : Dynamic test-case generation and automated scoring.
+* [x] **ROLE-BASED PORTALS** : Isolated Student and Faculty dashboards.
+* [x] **SECURE AUTHENTICATION** : JWT sessions + Brevo OTP email verification.
+* [x] **INTEGRATED IDE** : Monaco Editor implementation for a VS Code-like experience.
 
-## 📂 Project Structure
+---
 
-\`\`\`text
-AptIQ/
-├── backend/
-│   ├── models/           # Mongoose schemas (User, Question, Task, etc.)
-│   ├── server.js         # Express app entry point & API routes
-│   └── package.json
-└── frontend/
-    ├── src/
-    │   ├── components/   # React components (AssessmentRoom, Dashboards, etc.)
-    │   ├── App.jsx       # Main application routing
-    │   └── main.jsx
-    ├── vite.config.js
-    └── package.json
-\`\`\`
+### [ 03. ARCHITECTURE DIRECTORY ]
+    AptIQ_Root/
+     │
+     ├── /backend               [ REST API & Database Models ]
+     │   ├── /models            - Mongoose schemas (User, Task, Questions)
+     │   ├── server.js          - Express routing & authentication logic
+     │   └── .env               - Environment secrets (Local)
+     │
+     └── /frontend              [ React UI & Client Logic ]
+         ├── /src               
+         │   ├── /components    - Modular UI (AssessmentRoom, Dashboards)
+         │   ├── App.jsx        - Route controller
+         │   └── main.jsx       - Application entry
+         ├── vite.config.js     - Bundler configuration
+         └── package.json       - Client dependencies
 
-## 🚀 Local Setup & Installation
+---
 
-### Prerequisites
-*   Node.js installed
-*   MongoDB Atlas account/connection URI
-*   Brevo account for SMTP API keys
+### [ 04. INITIALIZATION SEQUENCE ]
 
-### 1. Clone the Repository
-\`\`\`bash
-git clone https://github.com/your-username/AptIQ.git
-cd AptIQ
-\`\`\`
+**[ Prerequisites ]**
+> Node.js (v18+)
+> MongoDB Atlas Cluster
+> Brevo API Key
 
-### 2. Backend Setup
-\`\`\`bash
-cd backend
-npm install
-\`\`\`
-Create a `.env` file in the `backend` directory:
-\`\`\`env
-PORT=3000
-MONGO_URI=your_mongodb_connection_string
-BREVO_API_KEY=your_brevo_api_key
-\`\`\`
-Start the backend server:
-\`\`\`bash
-npm start
-\`\`\`
+**[ Backend Boot Sequence ]**
+    $ cd backend
+    $ npm install
+    $ echo "PORT=3000" >> .env
+    $ echo "MONGO_URI=your_cluster_url" >> .env
+    $ echo "BREVO_API_KEY=your_brevo_key" >> .env
+    $ npm start
 
-### 3. Frontend Setup
-\`\`\`bash
-cd ../frontend
-npm install
-\`\`\`
-Create a `.env` file in the `frontend` directory:
-\`\`\`env
-VITE_API_URL=http://localhost:3000
-\`\`\`
-Start the Vite development server:
-\`\`\`bash
-npm run dev
-\`\`\`
+**[ Frontend Boot Sequence ]**
+    $ cd frontend
+    $ npm install
+    $ echo "VITE_API_URL=https://aptiqforu.onrender.com" >> .env
+    $ npm run dev
 
-## 🌐 API Endpoints Overview
+---
 
-| Method | Endpoint | Description |
-| :--- | :--- | :--- |
-| `POST` | `/api/register/send-otp` | Initiates email verification for new users |
-| `POST` | `/api/login` | Authenticates user and returns JWT |
-| `GET` | `/api/questions` | Fetches MCQs based on topic and difficulty level |
-| `GET` | `/api/coding-questions` | Fetches available Python challenges |
-| `POST` | `/api/save-score` | Records student performance to their profile |
-| `GET` | `/api/tasks` | Retrieves active faculty-assigned assessments |
+### [ 05. API ENDPOINTS ]
 
-## 👨‍💻 Author
+| METHOD | ROUTE                      | PROCESS                             |
+| :----- | :------------------------- | :---------------------------------- |
+| POST   | `/api/register/send-otp`   | Dispatches 2FA code to email        |
+| POST   | `/api/login`               | Issues JWT auth token               |
+| GET    | `/api/questions`           | Retrieves MCQ data payload          |
+| POST   | `/api/save-score`          | Commits user score to database      |
+| GET    | `/api/tasks`               | Fetches faculty-assigned modules    |
 
-**Saikrishna Chaitanya**
-*   Computer Science Undergraduate @ SRU '27
-*   [LinkedIn](your-linkedin-url) | [GitHub](your-github-url)
+---
+
+### [ 06. SYS_ADMIN ]
+**Developed & Maintained by:**
+> **Saikrishna Chaitanya**
+> Undergrad @ SRU '27
+> 🔗 [LinkedIn](https://www.linkedin.com/in/sai-krishnachaithanya/)
+> 🐙 [GitHub](https://github.com/vskChaithanya)
+
+=============================================================================
+> EOF
+=============================================================================
